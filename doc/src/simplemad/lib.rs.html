@@ -641,6 +641,10 @@
 <span id="599">599</span>
 <span id="600">600</span>
 <span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
 This crate provides an interface to libmad, allowing the decoding of MPEG
@@ -932,9 +936,13 @@ for item in decoder {
     <span class='ident'>message_func</span>: <span class='ident'>size_t</span>,
 }
 
+<span class='doccomment'>/// A decoded frame</span>
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Frame</span> {
+    <span class='doccomment'>/// Number of samples per second</span>
     <span class='kw'>pub</span> <span class='ident'>sample_rate</span>: <span class='ident'>usize</span>,
+    <span class='doccomment'>/// Samples are signed 32 bit integers and are organized into channels.</span>
+    <span class='doccomment'>/// For stereo, the left channel is channel 0.</span>
     <span class='kw'>pub</span> <span class='ident'>samples</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;&gt;</span>,
 }
 

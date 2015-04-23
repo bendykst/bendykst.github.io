@@ -43,12 +43,16 @@
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>simplemad</a>::<wbr><a class='struct' href=''>Frame</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-724' href='../src/simplemad/lib.rs.html#292-295'>[src]</a></span></h1>
+        </span><a id='src-724' href='../src/simplemad/lib.rs.html#293-299'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Frame {
     pub sample_rate: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>,
     pub samples: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>&gt;&gt;,
-}</pre><h2 class='fields'>Fields</h2>
-<table><tr><td id='structfield.sample_rate'><a class='stability Unmarked' title='No stability level'></a><code>sample_rate</code></td><td></td></tr><tr><td id='structfield.samples'><a class='stability Unmarked' title='No stability level'></a><code>samples</code></td><td></td></tr></table></section>
+}</pre><div class='docblock'><p>A decoded frame</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr><td id='structfield.sample_rate'><a class='stability Unmarked' title='No stability level'></a><code>sample_rate</code></td><td><div class='docblock'><p>Number of samples per second</p>
+</div></td></tr><tr><td id='structfield.samples'><a class='stability Unmarked' title='No stability level'></a><code>samples</code></td><td><div class='docblock'><p>Samples are signed 32 bit integers and are organized into channels.
+For stereo, the left channel is channel 0.</p>
+</div></td></tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
