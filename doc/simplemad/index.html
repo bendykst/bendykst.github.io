@@ -43,15 +43,20 @@
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>simplemad</a><wbr></span><span class='out-of-band'><a href='stability.html'>[stability]</a> <span id='render-detail'>
             <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-0' href='../src/simplemad/lib.rs.html#1-596'>[src]</a></span></h1>
+        </span><a id='src-0' href='../src/simplemad/lib.rs.html#1-601'>[src]</a></span></h1>
 <div class='docblock'><p>This crate provides an interface to libmad, allowing the decoding of MPEG
-audio files, including MP3s. To begin decoding, create a new <code>Decoder</code> from
-a byte-oriented source. <code>Decoder</code> implements the <code>Iterator</code> interface,
-allowing convenient sequential access to the output of libmad.
-<code>Decoder</code> yields type <code>Result&lt;Frame, MadError&gt;</code>. Frame and MadError correspond
-to libmad&#39;s struct types mad_pcm and mad_error, respectively. Samples are signed
-32 bit integers and are organized into channels. For stereo, the left channel is
-channel 0.</p>
+audio files, including MP3s.</p>
+
+<p>To begin, create a new <code>Decoder</code> from a byte-oriented source.  <code>Decoder</code>
+implements the <code>Iterator</code> interface, allowing convenient sequential access to
+the output of libmad.  <code>Decoder</code> yields type <code>Result&lt;Frame, MadError&gt;</code>. <code>Frame</code>
+and <code>MadError</code> correspond to libmad&#39;s struct types <code>mad_pcm</code> and <code>mad_error</code>,
+respectively. Samples are signed 32 bit integers and are organized into channels.
+For stereo, the left channel is channel 0.</p>
+
+<p>MP3 files often begin with metadata, which will cause libmad to complain. It
+is safe to ignore errors until libmad reaches audio data and starts producing
+frames.</p>
 
 <h1 id="examples" class='section-header'><a
                            href="#examples">Examples</a></h1><pre id='rust-example-rendered' class='rust '>

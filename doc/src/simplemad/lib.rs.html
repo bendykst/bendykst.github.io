@@ -636,16 +636,26 @@
 <span id="594">594</span>
 <span id="595">595</span>
 <span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
 This crate provides an interface to libmad, allowing the decoding of MPEG
-audio files, including MP3s. To begin decoding, create a new `Decoder` from
-a byte-oriented source. `Decoder` implements the `Iterator` interface,
-allowing convenient sequential access to the output of libmad.
-`Decoder` yields type `Result&lt;Frame, MadError&gt;`. Frame and MadError correspond
-to libmad&#39;s struct types mad_pcm and mad_error, respectively. Samples are signed
-32 bit integers and are organized into channels. For stereo, the left channel is
-channel 0.
+audio files, including MP3s.
+
+To begin, create a new `Decoder` from a byte-oriented source.  `Decoder`
+implements the `Iterator` interface, allowing convenient sequential access to
+the output of libmad.  `Decoder` yields type `Result&lt;Frame, MadError&gt;`. `Frame`
+and `MadError` correspond to libmad&#39;s struct types `mad_pcm` and `mad_error`,
+respectively. Samples are signed 32 bit integers and are organized into channels.
+For stereo, the left channel is channel 0.
+
+MP3 files often begin with metadata, which will cause libmad to complain. It
+is safe to ignore errors until libmad reaches audio data and starts producing
+frames.
 
 # Examples
 ```
