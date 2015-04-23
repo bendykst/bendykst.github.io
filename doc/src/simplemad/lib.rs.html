@@ -671,11 +671,11 @@ let path = Path::new(&quot;sample_mp3s/constant_stereo_128.mp3&quot;);
 let file = File::open(&amp;path).unwrap();
 let mut decoder = Decoder::new(file);
 
-// Take frames one at a time
-let first_decode_result = decoder.next();
-let second_decode_result = decoder.next();
+// Take results one at a time
+let first_decoder_result = decoder.next();
+let second_decoder_result = decoder.next();
 
-// Read the rest of the frames using a loop
+// Read the rest of the results using a loop
 for item in decoder {
     match item {
         Err(e) =&gt; println!(&quot;Error: {:?}&quot;, e),

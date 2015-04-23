@@ -68,11 +68,11 @@ frames.</p>
 <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>new</span>(<span class='ident'>file</span>);
 
-<span class='comment'>// Take frames one at a time</span>
-<span class='kw'>let</span> <span class='ident'>first_decode_result</span> <span class='op'>=</span> <span class='ident'>decoder</span>.<span class='ident'>next</span>();
-<span class='kw'>let</span> <span class='ident'>second_decode_result</span> <span class='op'>=</span> <span class='ident'>decoder</span>.<span class='ident'>next</span>();
+<span class='comment'>// Take results one at a time</span>
+<span class='kw'>let</span> <span class='ident'>first_decoder_result</span> <span class='op'>=</span> <span class='ident'>decoder</span>.<span class='ident'>next</span>();
+<span class='kw'>let</span> <span class='ident'>second_decoder_result</span> <span class='op'>=</span> <span class='ident'>decoder</span>.<span class='ident'>next</span>();
 
-<span class='comment'>// Read the rest of the frames using a loop</span>
+<span class='comment'>// Read the rest of the results using a loop</span>
 <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
     <span class='kw'>match</span> <span class='ident'>item</span> {
         <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Error: {:?}&quot;</span>, <span class='ident'>e</span>),
