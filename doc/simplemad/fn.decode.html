@@ -45,8 +45,8 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-113' class='srclink' href='../src/simplemad/lib.rs.html#77-80' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn decode&lt;T&gt;(reader: T) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/std/sync/mpsc/struct.Receiver.html' title='std::sync::mpsc::Receiver'>Receiver</a>&lt;<a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../simplemad/struct.Frame.html' title='simplemad::Frame'>Frame</a>, <a class='enum' href='../simplemad/enum.MadError.html' title='simplemad::MadError'>MadError</a>&gt;&gt; <span class='where'>where T: <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Read.html' title='std::io::Read'>Read</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'static</span></pre><div class='docblock'><p>Decode a file in full</p>
+        </span><a id='src-1132' class='srclink' href='../src/simplemad/lib.rs.html#328-331' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn decode&lt;R&gt;(reader: R) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../simplemad/struct.Decoder.html' title='simplemad::Decoder'>Decoder</a>&lt;R&gt;, <a class='enum' href='../simplemad/enum.SimplemadError.html' title='simplemad::SimplemadError'>SimplemadError</a>&gt; <span class='where'>where R: <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Read.html' title='std::io::Read'>Read</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'static</span></pre><div class='docblock'><p>Decode a file in full</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

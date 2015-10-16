@@ -45,12 +45,12 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/simplemad/lib.rs.html#1-680' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/simplemad/lib.rs.html#1-589' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>This crate provides an interface to libmad, the MPEG audio decoding library.</p>
 
-<p><code>simplemad::decode</code> takes a byte-oriented source and returns a channel that
-yields <code>Result&lt;Frame, MadError&gt;</code>. If you only need to decode part of a file,
-you can also use <code>simplemad::decode_interval</code>.</p>
+<p>To begin, create a new <code>Decoder</code> from a byte-oriented source using
+<code>Decoder::decode</code> or <code>Decoder::decode_interval</code>. Fetch results using
+<code>get_frame</code> or the <code>Iterator</code> interface.</p>
 
 <p><code>Frame</code> and <code>MadError</code> correspond to libmad&#39;s struct types <code>mad_pcm</code> and
 <code>mad_error</code>, respectively. Samples are signed 32 bit integers and are organized
@@ -62,16 +62,17 @@ producing frames.</p>
 
 <h1 id="examples" class='section-header'><a
                            href="#examples">Examples</a></h1><pre class='rust rust-example-rendered'>
-<span class='kw'>use</span> <span class='ident'>simplemad</span>::{<span class='ident'>decode</span>, <span class='ident'>decode_interval</span>, <span class='ident'>Frame</span>};
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
+<span class='kw'>use</span> <span class='ident'>simplemad</span>::{<span class='ident'>Decoder</span>, <span class='ident'>Frame</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
 
 <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
 <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
 <span class='kw'>let</span> <span class='ident'>file_b</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>decode</span>(<span class='ident'>file</span>);
+<span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
 
-<span class='kw'>for</span> <span class='ident'>decoding_result</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+<span class='kw'>for</span> <span class='ident'>decoding_result</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
     <span class='kw'>match</span> <span class='ident'>decoding_result</span> {
         <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Error: {:?}&quot;</span>, <span class='ident'>e</span>),
         <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>) <span class='op'>=&gt;</span> {
@@ -83,14 +84,23 @@ producing frames.</p>
 }
 
 <span class='comment'>// Decode the interval from 1s to 2s (to the nearest frame)</span>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>partial_decoder</span> <span class='op'>=</span> <span class='ident'>decode_interval</span>(<span class='ident'>file_b</span>, <span class='number'>1_000_f64</span>, <span class='number'>2_000_f64</span>);
-<span class='kw'>let</span> <span class='ident'>frames</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Frame</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>partial_decoder</span>.<span class='ident'>iter</span>()
+<span class='kw'>let</span> <span class='ident'>partial_decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file_b</span>, <span class='number'>1_000_f64</span>, <span class='number'>2_000_f64</span>);
+<span class='kw'>let</span> <span class='ident'>frames</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Frame</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>partial_decoder</span>.<span class='ident'>unwrap</span>()
                                         .<span class='ident'>filter_map</span>(<span class='op'>|</span><span class='ident'>r</span><span class='op'>|</span> <span class='kw'>match</span> <span class='ident'>r</span> {
                                             <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>f</span>),
                                             <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>})
                                         .<span class='ident'>collect</span>();</pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Decoder.html'
+                               title='simplemad::Decoder'>Decoder</a></td>
+                        <td class='docblock short'>
+                             <p>An interface for the decoding operation</p>
+
+                        </td>
+                    </tr>
+                
                     <tr class=' module-item'>
                         <td><a class='struct' href='struct.Frame.html'
                                title='simplemad::Frame'>Frame</a></td>
@@ -102,29 +112,10 @@ producing frames.</p>
                 </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
                     <tr class=' module-item'>
-                        <td><a class='enum' href='enum.MadError.html'
-                               title='simplemad::MadError'>MadError</a></td>
+                        <td><a class='enum' href='enum.SimplemadError.html'
+                               title='simplemad::SimplemadError'>SimplemadError</a></td>
                         <td class='docblock short'>
-                             <p>Errors generated by libmad</p>
-
-                        </td>
-                    </tr>
-                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
-<table>
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.decode.html'
-                               title='simplemad::decode'>decode</a></td>
-                        <td class='docblock short'>
-                             <p>Decode a file in full</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.decode_interval.html'
-                               title='simplemad::decode_interval'>decode_interval</a></td>
-                        <td class='docblock short'>
-                             <p>Decode part of a file from <code>start_time</code> to <code>end_time</code>, measured in milliseconds</p>
+                             <p>An error encountered during the decoding process</p>
 
                         </td>
                     </tr>

@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `decode_interval` fn in crate `simplemad`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, decode_interval">
+    <meta name="description" content="API documentation for the Rust `mad_header_decode` fn in crate `simplemad_sys`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, mad_header_decode">
 
-    <title>simplemad::decode_interval - Rust</title>
+    <title>simplemad_sys::mad_header_decode - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='index.html'>simplemad</a></p><script>window.sidebarCurrent = {name: 'decode_interval', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>simplemad_sys</a></p><script>window.sidebarCurrent = {name: 'mad_header_decode', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,13 +41,12 @@
     </nav>
 
     <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'>Function <a href='index.html'>simplemad</a>::<wbr><a class='fn' href=''>decode_interval</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'><a href='index.html'>simplemad_sys</a>::<wbr><a class='fn' href=''>mad_header_decode</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1152' class='srclink' href='../src/simplemad/lib.rs.html#334-337' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn decode_interval&lt;R&gt;(reader: R, start_time: <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>, end_time: <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../simplemad/struct.Decoder.html' title='simplemad::Decoder'>Decoder</a>&lt;R&gt;, <a class='enum' href='../simplemad/enum.SimplemadError.html' title='simplemad::SimplemadError'>SimplemadError</a>&gt; <span class='where'>where R: <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Read.html' title='std::io::Read'>Read</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'static</span></pre><div class='docblock'><p>Decode part of a file from <code>start_time</code> to <code>end_time</code>, measured in milliseconds</p>
-</div></section>
+        </span><a id='src-152' class='srclink' href='../src/simplemad_sys/lib.rs.html#45' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub unsafe extern fn mad_header_decode(header: &amp;mut <a class='struct' href='../simplemad_sys/struct.MadHeader.html' title='simplemad_sys::MadHeader'>MadHeader</a>, stream: &amp;mut <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a>)</pre></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -98,7 +97,7 @@
 
     <script>
         window.rootPath = "../";
-        window.currentCrate = "simplemad";
+        window.currentCrate = "simplemad_sys";
         window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>

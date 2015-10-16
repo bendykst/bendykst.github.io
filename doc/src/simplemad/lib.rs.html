@@ -629,104 +629,13 @@
 <span id="587">587</span>
 <span id="588">588</span>
 <span id="589">589</span>
-<span id="590">590</span>
-<span id="591">591</span>
-<span id="592">592</span>
-<span id="593">593</span>
-<span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
-<span id="598">598</span>
-<span id="599">599</span>
-<span id="600">600</span>
-<span id="601">601</span>
-<span id="602">602</span>
-<span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
-<span id="633">633</span>
-<span id="634">634</span>
-<span id="635">635</span>
-<span id="636">636</span>
-<span id="637">637</span>
-<span id="638">638</span>
-<span id="639">639</span>
-<span id="640">640</span>
-<span id="641">641</span>
-<span id="642">642</span>
-<span id="643">643</span>
-<span id="644">644</span>
-<span id="645">645</span>
-<span id="646">646</span>
-<span id="647">647</span>
-<span id="648">648</span>
-<span id="649">649</span>
-<span id="650">650</span>
-<span id="651">651</span>
-<span id="652">652</span>
-<span id="653">653</span>
-<span id="654">654</span>
-<span id="655">655</span>
-<span id="656">656</span>
-<span id="657">657</span>
-<span id="658">658</span>
-<span id="659">659</span>
-<span id="660">660</span>
-<span id="661">661</span>
-<span id="662">662</span>
-<span id="663">663</span>
-<span id="664">664</span>
-<span id="665">665</span>
-<span id="666">666</span>
-<span id="667">667</span>
-<span id="668">668</span>
-<span id="669">669</span>
-<span id="670">670</span>
-<span id="671">671</span>
-<span id="672">672</span>
-<span id="673">673</span>
-<span id="674">674</span>
-<span id="675">675</span>
-<span id="676">676</span>
-<span id="677">677</span>
-<span id="678">678</span>
-<span id="679">679</span>
-<span id="680">680</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
 This crate provides an interface to libmad, the MPEG audio decoding library.
 
-`simplemad::decode` takes a byte-oriented source and returns a channel that
-yields `Result&lt;Frame, MadError&gt;`. If you only need to decode part of a file,
-you can also use `simplemad::decode_interval`.
+To begin, create a new `Decoder` from a byte-oriented source using
+`Decoder::decode` or `Decoder::decode_interval`. Fetch results using
+`get_frame` or the `Iterator` interface.
 
 `Frame` and `MadError` correspond to libmad&#39;s struct types `mad_pcm` and
 `mad_error`, respectively. Samples are signed 32 bit integers and are organized
@@ -737,17 +646,18 @@ It is safe to ignore these errors until libmad reaches audio data and starts
 producing frames.
 
 # Examples
-```
-use simplemad::{decode, decode_interval, Frame};
+```no_run
+#![allow(unused_variables)]
+use simplemad::{Decoder, Frame};
 use std::fs::File;
 use std::path::Path;
 
 let path = Path::new(&quot;sample_mp3s/constant_stereo_128.mp3&quot;);
 let file = File::open(&amp;path).unwrap();
 let file_b = File::open(&amp;path).unwrap();
-let mut decoder = decode(file);
+let decoder = Decoder::decode(file).unwrap();
 
-for decoding_result in decoder.iter() {
+for decoding_result in decoder {
     match decoding_result {
         Err(e) =&gt; println!(&quot;Error: {:?}&quot;, e),
         Ok(frame) =&gt; {
@@ -759,8 +669,8 @@ for decoding_result in decoder.iter() {
 }
 
 // Decode the interval from 1s to 2s (to the nearest frame)
-let mut partial_decoder = decode_interval(file_b, 1_000_f64, 2_000_f64);
-let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
+let partial_decoder = Decoder::decode_interval(file_b, 1_000_f64, 2_000_f64);
+let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                                         .filter_map(|r| match r {
                                             Ok(f) =&gt; Some(f),
                                             Err(_) =&gt; None})
@@ -770,19 +680,15 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;simplemad&quot;</span>]</span>
 
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>simplemad_sys</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Read</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>::{<span class='ident'>SyncSender</span>, <span class='ident'>Receiver</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>marker</span>::<span class='ident'>Send</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>option</span>::<span class='prelude-ty'>Option</span>::<span class='prelude-val'>None</span>;
-<span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>types</span>::<span class='ident'>common</span>::<span class='ident'>c95</span>::<span class='ident'>c_void</span>;
-<span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>types</span>::<span class='ident'>common</span>::<span class='ident'>c99</span>::<span class='op'>*</span>;
-<span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>types</span>::<span class='ident'>os</span>::<span class='ident'>arch</span>::<span class='ident'>c95</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>min</span>;
+<span class='kw'>use</span> <span class='ident'>simplemad_sys</span>::<span class='op'>*</span>;
 
 <span class='doccomment'>/// A decoded frame</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
@@ -796,374 +702,180 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
     <span class='kw'>pub</span> <span class='ident'>position</span>: <span class='ident'>f64</span>,
 }
 
-<span class='doccomment'>/// Decode a file in full</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>decode</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>reader</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>MadError</span><span class='op'>&gt;&gt;</span>
-    <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
-    <span class='ident'>spawn_decoder</span>(<span class='ident'>reader</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
+<span class='doccomment'>/// An interface for the decoding operation</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Create a new decoder using `decode` or `decode_interval`. Get decoding</span>
+<span class='doccomment'>/// results by calling `get_frame` or by using the `Iterator` interface.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
+    <span class='ident'>reader</span>: <span class='ident'>R</span>,
+    <span class='ident'>buffer</span>: <span class='ident'>Box</span><span class='op'>&lt;</span>[<span class='ident'>u8</span>; <span class='number'>32_768</span>]<span class='op'>&gt;</span>,
+    <span class='ident'>stream</span>: <span class='ident'>MadStream</span>,
+    <span class='ident'>synth</span>: <span class='ident'>MadSynth</span>,
+    <span class='ident'>frame</span>: <span class='ident'>MadFrame</span>,
+    <span class='ident'>start_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
+    <span class='ident'>end_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
+    <span class='ident'>position_ms</span>: <span class='ident'>f64</span>,
 }
 
-<span class='doccomment'>/// Decode part of a file from `start_time` to `end_time`, measured in milliseconds</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>decode_interval</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>reader</span>: <span class='ident'>T</span>, <span class='ident'>start_time</span>: <span class='ident'>f64</span>, <span class='ident'>end_time</span>: <span class='ident'>f64</span>)
-    <span class='op'>-&gt;</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>MadError</span><span class='op'>&gt;&gt;</span> <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
-    <span class='ident'>spawn_decoder</span>(<span class='ident'>reader</span>, <span class='prelude-val'>Some</span>(<span class='ident'>start_time</span>), <span class='prelude-val'>Some</span>(<span class='ident'>end_time</span>))
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
+<span class='doccomment'>/// An error encountered during the decoding process</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>SimplemadError</span> {
+    <span class='doccomment'>/// An `io::Error` generated by the `Reader`</span>
+    <span class='ident'>Read</span>(<span class='ident'>io</span>::<span class='ident'>Error</span>),
+    <span class='doccomment'>/// A `MadError` generated by libmad</span>
+    <span class='ident'>Mad</span>(<span class='ident'>MadError</span>),
+    <span class='doccomment'>/// The `Reader` has stopped producing data</span>
+    <span class='ident'>EOF</span>,
 }
 
-<span class='kw'>fn</span> <span class='ident'>spawn_decoder</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='kw-2'>mut</span> <span class='ident'>reader</span>: <span class='ident'>T</span>, <span class='ident'>start_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>end_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>)
-    <span class='op'>-&gt;</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>MadError</span><span class='op'>&gt;&gt;</span> <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
-    <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>MadError</span><span class='op'>&gt;&gt;</span>(<span class='number'>2</span>);
-    <span class='ident'>thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
-        <span class='kw'>let</span> <span class='ident'>input_buffer</span> <span class='op'>=</span> <span class='ident'>Box</span>::<span class='ident'>new</span>([<span class='number'>0u8</span>; <span class='number'>32768</span>]);
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>decoder</span>: <span class='ident'>MadDecoder</span> <span class='op'>=</span> <span class='ident'>Default</span>::<span class='ident'>default</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>MadMessage</span> {
-            <span class='ident'>buffer</span>: <span class='ident'>input_buffer</span>,
-            <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>reader</span>,
-            <span class='ident'>sender</span>: <span class='kw-2'>&amp;</span><span class='ident'>tx</span>,
-            <span class='ident'>start_time</span>: <span class='ident'>start_time</span>,
-            <span class='ident'>end_time</span>: <span class='ident'>end_time</span>,
-            <span class='ident'>current_time</span>: <span class='number'>0.0</span>,
-        };
-        <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>message_ptr</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>message</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> _ <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>;
-            <span class='ident'>mad_decoder_init</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>decoder</span>,
-                             <span class='ident'>message_ptr</span>,
-                             <span class='ident'>input_cb</span>,
-                             <span class='ident'>header_cb</span>,
-                             <span class='ident'>empty_cb</span>,
-                             <span class='ident'>output_cb</span>,
-                             <span class='ident'>error_cb</span>,
-                             <span class='ident'>empty_cb</span>);
-            <span class='ident'>mad_decoder_run</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>decoder</span>, <span class='ident'>MadDecoderMode</span>::<span class='ident'>Sync</span>);
-            <span class='ident'>mad_decoder_finish</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>decoder</span>);
-        }
-    });
-    <span class='ident'>rx</span>
-}
-
-<span class='kw'>struct</span> <span class='ident'>MadMessage</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='ident'>buffer</span>: <span class='ident'>Box</span><span class='op'>&lt;</span>[<span class='ident'>u8</span>]<span class='op'>&gt;</span>,
-    <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> (<span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='lifetime'>&#39;a</span>),
-    <span class='ident'>sender</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>SyncSender</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>MadError</span><span class='op'>&gt;&gt;</span>,
-    <span class='ident'>start_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
-    <span class='ident'>end_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
-    <span class='ident'>current_time</span>: <span class='ident'>f64</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>link</span>(<span class='ident'>name</span> <span class='op'>=</span> <span class='string'>&quot;mad&quot;</span>)]</span>
-<span class='kw'>extern</span> {
-    <span class='kw'>fn</span> <span class='ident'>mad_decoder_init</span>(<span class='ident'>decoder</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>MadDecoder</span>,
-                        <span class='ident'>message</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>,
-                        <span class='ident'>input_cb</span>: <span class='kw'>extern</span> <span class='kw'>fn</span>(<span class='ident'>message</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>,
-                                            <span class='ident'>stream</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadStream</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span>,
-                        <span class='ident'>header_cb</span>: <span class='kw'>extern</span> <span class='kw'>fn</span>(<span class='ident'>message</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>,
-                                             <span class='ident'>header</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadHeader</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span>,
-                        <span class='ident'>filter_cb</span>: <span class='kw'>extern</span> <span class='kw'>fn</span>(),
-                        <span class='ident'>output_cb</span>: <span class='kw'>extern</span> <span class='kw'>fn</span>(<span class='ident'>message</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>,
-                                             <span class='ident'>header</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadHeader</span>,
-                                             <span class='ident'>pcm</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadPcm</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span>,
-                        <span class='ident'>error_cb</span>: <span class='kw'>extern</span> <span class='kw'>fn</span>(<span class='ident'>message</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>,
-                                            <span class='ident'>stream</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadStream</span>,
-                                            <span class='ident'>frame</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span>,
-                        <span class='ident'>message_cb</span>: <span class='kw'>extern</span> <span class='kw'>fn</span>());
-    <span class='kw'>fn</span> <span class='ident'>mad_decoder_run</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MadDecoder</span>, <span class='ident'>mode</span>: <span class='ident'>MadDecoderMode</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
-    <span class='kw'>fn</span> <span class='ident'>mad_decoder_finish</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MadDecoder</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
-    <span class='kw'>fn</span> <span class='ident'>mad_stream_buffer</span>(<span class='ident'>stream</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadStream</span>,
-                         <span class='ident'>buf_start</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>,
-                         <span class='ident'>buf_samples</span>: <span class='ident'>size_t</span>);
-}
-
-<span class='doccomment'>/// libmad callbacks return MadFlow values, which are used to control the decoding process</span>
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>enum</span> <span class='ident'>MadFlow</span> {
-    <span class='doccomment'>/// continue normally</span>
-    <span class='ident'>Continue</span> <span class='op'>=</span> <span class='number'>0x0000</span>,
-
-    <span class='doccomment'>/// stop decoding normally</span>
-    <span class='ident'>Stop</span> <span class='op'>=</span> <span class='number'>0x0010</span>,
-
-    <span class='doccomment'>/// stop decoding and signal an error</span>
-    <span class='ident'>Break</span> <span class='op'>=</span> <span class='number'>0x0011</span>,
-
-    <span class='doccomment'>/// ignore the current frame</span>
-    <span class='ident'>Ignore</span> <span class='op'>=</span> <span class='number'>0x0020</span>,
-
-}
-
-<span class='doccomment'>/// Errors generated by libmad</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MadError</span> {
-    <span class='doccomment'>/// no error</span>
-    <span class='prelude-val'>None</span> <span class='op'>=</span> <span class='number'>0x0000</span>,
-
-    <span class='doccomment'>/// input buffer too small (or eof)</span>
-    <span class='ident'>BufLen</span> <span class='op'>=</span> <span class='number'>0x0001</span>,
-
-    <span class='doccomment'>/// invalid (null) buffer pointer</span>
-    <span class='ident'>BufPtr</span> <span class='op'>=</span> <span class='number'>0x0002</span>,
-
-    <span class='doccomment'>/// not enough memory</span>
-    <span class='ident'>NoMem</span> <span class='op'>=</span> <span class='number'>0x0031</span>,
-
-    <span class='doccomment'>/// lost synchronization</span>
-    <span class='ident'>LostSync</span> <span class='op'>=</span> <span class='number'>0x0101</span>,
-
-    <span class='doccomment'>/// reserved header layer value</span>
-    <span class='ident'>BadLayer</span> <span class='op'>=</span> <span class='number'>0x0102</span>,
-
-    <span class='doccomment'>/// forbidden bitrate value</span>
-    <span class='ident'>BadBitRate</span> <span class='op'>=</span> <span class='number'>0x0103</span>,
-
-    <span class='doccomment'>/// reserved sample frequency value</span>
-    <span class='ident'>BadSampleRate</span> <span class='op'>=</span> <span class='number'>0x0104</span>,
-
-    <span class='doccomment'>/// reserved emphasis value</span>
-    <span class='ident'>BadEmphasis</span> <span class='op'>=</span> <span class='number'>0x0105</span>,
-
-    <span class='doccomment'>/// crc check failed</span>
-    <span class='ident'>BadCRC</span> <span class='op'>=</span> <span class='number'>0x0201</span>,
-
-    <span class='doccomment'>/// forbidden bit allocation value</span>
-    <span class='ident'>BadBitAlloc</span> <span class='op'>=</span> <span class='number'>0x0211</span>,
-
-    <span class='doccomment'>/// bad scalefactor index</span>
-    <span class='ident'>BadScaleFactor</span> <span class='op'>=</span> <span class='number'>0x0221</span>,
-
-    <span class='doccomment'>/// bad bitrate/mode combination</span>
-    <span class='ident'>BadMode</span> <span class='op'>=</span> <span class='number'>0x0222</span>,
-
-    <span class='doccomment'>/// bad frame length</span>
-    <span class='ident'>BadFrameLen</span> <span class='op'>=</span> <span class='number'>0x0231</span>,
-
-    <span class='doccomment'>/// bad big_values count</span>
-    <span class='ident'>BadBigValues</span> <span class='op'>=</span> <span class='number'>0x0232</span>,
-
-    <span class='doccomment'>/// reserved block_type</span>
-    <span class='ident'>BadBlockType</span> <span class='op'>=</span> <span class='number'>0x0233</span>,
-
-    <span class='doccomment'>/// bad scalefactor selection info</span>
-    <span class='ident'>BadScFSI</span> <span class='op'>=</span> <span class='number'>0x0234</span>,
-
-    <span class='doccomment'>/// bad main_data_begin pointer</span>
-    <span class='ident'>BadDataPtr</span> <span class='op'>=</span> <span class='number'>0x0235</span>,
-
-    <span class='doccomment'>/// bad audio data length</span>
-    <span class='ident'>BadPart3Len</span> <span class='op'>=</span> <span class='number'>0x0236</span>,
-
-    <span class='doccomment'>/// bad huffman table select</span>
-    <span class='ident'>BadHuffTable</span> <span class='op'>=</span> <span class='number'>0x0237</span>,
-
-    <span class='doccomment'>/// huffman data overrun</span>
-    <span class='ident'>BadHuffData</span> <span class='op'>=</span> <span class='number'>0x0238</span>,
-
-    <span class='doccomment'>/// incompatible block_type for joint stereo</span>
-    <span class='ident'>BadStereo</span> <span class='op'>=</span> <span class='number'>0x0239</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>MadBitPtr</span> {
-    <span class='ident'>byte</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>cache</span>: <span class='ident'>uint16_t</span>,
-    <span class='ident'>left</span>: <span class='ident'>uint16_t</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>MadStream</span> {
-    <span class='ident'>buffer</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>buff_end</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>skip_len</span>: <span class='ident'>c_ulong</span>,
-    <span class='ident'>sync</span>: <span class='ident'>c_int</span>,
-    <span class='ident'>free_rate</span>: <span class='ident'>c_ulong</span>,
-    <span class='ident'>this_frame</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>next_frame</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>ptr</span>: <span class='ident'>MadBitPtr</span>,
-    <span class='ident'>anc_ptr</span>: <span class='ident'>MadBitPtr</span>,
-    <span class='ident'>anc_bitlen</span>: <span class='ident'>c_uint</span>,
-    <span class='ident'>buffer_mdlen</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>md_len</span>: <span class='ident'>c_uint</span>,
-    <span class='ident'>options</span>: <span class='ident'>c_int</span>,
-    <span class='ident'>error</span>: <span class='ident'>MadError</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>enum</span> <span class='ident'>MadLayer</span> {
-    <span class='ident'>Layer1</span> <span class='op'>=</span> <span class='number'>1</span>,
-    <span class='ident'>Layer2</span> <span class='op'>=</span> <span class='number'>2</span>,
-    <span class='ident'>Layer3</span> <span class='op'>=</span> <span class='number'>3</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>enum</span> <span class='ident'>MadMode</span> {
-    <span class='ident'>SingleChannel</span> <span class='op'>=</span> <span class='number'>0</span>,
-    <span class='ident'>DualChannel</span> <span class='op'>=</span> <span class='number'>1</span>,
-    <span class='ident'>JointStereo</span> <span class='op'>=</span> <span class='number'>2</span>,
-    <span class='ident'>Stereo</span> <span class='op'>=</span> <span class='number'>3</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>enum</span> <span class='ident'>MadEmphasis</span> {
-    <span class='prelude-val'>None</span> <span class='op'>=</span> <span class='number'>0</span>,
-    <span class='ident'>Fifty15Us</span> <span class='op'>=</span> <span class='number'>1</span>,
-    <span class='ident'>CcittJ17</span> <span class='op'>=</span> <span class='number'>3</span>,
-    <span class='ident'>Reserved</span> <span class='op'>=</span> <span class='number'>2</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>MadTimer</span> {
-    <span class='ident'>seconds</span>: <span class='ident'>c_long</span>,
-    <span class='ident'>fraction</span>: <span class='ident'>c_ulong</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>MadHeader</span> {
-    <span class='ident'>layer</span>: <span class='ident'>MadLayer</span>,
-    <span class='ident'>mode</span>: <span class='ident'>MadMode</span>,
-    <span class='ident'>mode_extension</span>: <span class='ident'>c_int</span>,
-    <span class='ident'>emphasis</span>: <span class='ident'>MadEmphasis</span>,
-    <span class='ident'>bit_rate</span>: <span class='ident'>c_ulong</span>,
-    <span class='ident'>sample_rate</span>: <span class='ident'>c_uint</span>,
-    <span class='ident'>crc_check</span>: <span class='ident'>c_ushort</span>,
-    <span class='ident'>crc_target</span>: <span class='ident'>c_ushort</span>,
-    <span class='ident'>flags</span>: <span class='ident'>c_int</span>,
-    <span class='ident'>private_bits</span>: <span class='ident'>c_int</span>,
-    <span class='ident'>duration</span>: <span class='ident'>MadTimer</span>,
-}
-
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>MadPcm</span> {
-    <span class='ident'>sample_rate</span>: <span class='ident'>c_uint</span>,
-    <span class='ident'>channels</span>: <span class='ident'>uint16_t</span>,
-    <span class='ident'>length</span>: <span class='ident'>uint16_t</span>,
-    <span class='ident'>samples</span>: [[<span class='ident'>int32_t</span>; <span class='number'>1152</span>]; <span class='number'>2</span>],
-}
-
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>enum</span> <span class='ident'>MadDecoderMode</span> {
-    <span class='ident'>Sync</span> <span class='op'>=</span> <span class='number'>0</span>,
-    <span class='ident'>Async</span>
-}
-
-<span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>MadDecoderMode</span> {
-    <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>MadDecoderMode</span> {
-        <span class='ident'>MadDecoderMode</span>::<span class='ident'>Sync</span>
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>MadError</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>SimplemadError</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>err</span>: <span class='ident'>MadError</span>) <span class='op'>-&gt;</span> <span class='ident'>SimplemadError</span> {
+        <span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>err</span>)
     }
 }
 
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Default</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>MadAsyncParameters</span> {
-    <span class='ident'>pid</span>: <span class='ident'>c_long</span>,
-    <span class='ident'>ain</span>: <span class='ident'>c_int</span>,
-    <span class='ident'>aout</span>: <span class='ident'>c_int</span>,
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>SimplemadError</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>err</span>: <span class='ident'>io</span>::<span class='ident'>Error</span>) <span class='op'>-&gt;</span> <span class='ident'>SimplemadError</span> {
+        <span class='ident'>SimplemadError</span>::<span class='ident'>Read</span>(<span class='ident'>err</span>)
+    }
 }
 
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Default</span>)]</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>MadDecoder</span> {
-    <span class='ident'>mode</span>: <span class='ident'>MadDecoderMode</span>,
-    <span class='ident'>options</span>: <span class='ident'>c_int</span>,
-    <span class='ident'>async</span>: <span class='ident'>MadAsyncParameters</span>,
-    <span class='ident'>sync</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>cb_data</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>input_func</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>header_func</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>filter_func</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>output_func</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>error_func</span>: <span class='ident'>size_t</span>,
-    <span class='ident'>message_func</span>: <span class='ident'>size_t</span>,
-}
-
-<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>empty_cb</span>() {
-
-}
-
-<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>input_cb</span>(<span class='ident'>msg_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>, <span class='ident'>stream</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadStream</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span> {
-    <span class='kw'>unsafe</span> {
-        <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span>(<span class='ident'>msg_ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>MadMessage</span>);
-        <span class='kw'>let</span> <span class='ident'>buffer_size</span> <span class='op'>=</span> (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>buffer</span>.<span class='ident'>len</span>();
-        <span class='kw'>let</span> <span class='ident'>next_frame_position</span> <span class='op'>=</span> (<span class='ident'>stream</span>.<span class='ident'>next_frame</span> <span class='op'>-</span> <span class='ident'>stream</span>.<span class='ident'>buffer</span>) <span class='kw'>as</span> <span class='ident'>usize</span>;
-        <span class='kw'>let</span> <span class='ident'>unused_byte_count</span> <span class='op'>=</span> <span class='ident'>buffer_size</span> <span class='op'>-</span> <span class='ident'>min</span>(<span class='ident'>next_frame_position</span>, <span class='ident'>buffer_size</span>);
-
-        <span class='kw'>if</span> <span class='ident'>unused_byte_count</span> <span class='op'>==</span> <span class='ident'>buffer_size</span> {
-            <span class='ident'>mad_stream_buffer</span>(<span class='ident'>stream</span>, (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>buffer</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>buffer_size</span> <span class='kw'>as</span> <span class='ident'>u64</span>);
-        } <span class='kw'>else</span> {
-            <span class='comment'>// Shift unused data to front of buffer</span>
-            <span class='kw'>for</span> <span class='ident'>idx</span> <span class='kw'>in</span> <span class='number'>0</span> .. <span class='ident'>unused_byte_count</span> {
-                (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>buffer</span>[<span class='ident'>idx</span>] <span class='op'>=</span> (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>buffer</span>[<span class='ident'>idx</span> <span class='op'>+</span> <span class='ident'>next_frame_position</span>];
-            }
-
-            <span class='comment'>// Refill rest of buffer</span>
-            <span class='kw'>let</span> <span class='ident'>bytes_read</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>next_frame_position</span> <span class='op'>==</span> <span class='number'>0</span> {
-                <span class='kw'>match</span> (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span>(<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>buffer</span>) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>val</span>) <span class='op'>=&gt;</span> <span class='ident'>val</span>,
-                    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {<span class='kw'>return</span> <span class='ident'>MadFlow</span>::<span class='ident'>Stop</span>;},
-                }
-            } <span class='kw'>else</span> {
-                <span class='kw'>let</span> <span class='ident'>slice</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>buffer</span>[<span class='ident'>unused_byte_count</span>..<span class='ident'>buffer_size</span>];
-                <span class='kw'>match</span> (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='ident'>slice</span>) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>val</span>) <span class='op'>=&gt;</span> <span class='ident'>val</span>,
-                    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {<span class='kw'>return</span> <span class='ident'>MadFlow</span>::<span class='ident'>Stop</span>;},
-                }
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
+    <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>reader</span>: <span class='ident'>R</span>, <span class='ident'>start_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>end_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>)
+            <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new_decoder</span> <span class='op'>=</span>
+            <span class='ident'>Decoder</span> {
+                <span class='ident'>reader</span>: <span class='ident'>reader</span>,
+                <span class='ident'>buffer</span>: <span class='ident'>Box</span>::<span class='ident'>new</span>([<span class='number'>0u8</span>; <span class='number'>32_768</span>]),
+                <span class='ident'>stream</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>(),
+                <span class='ident'>synth</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>(),
+                <span class='ident'>frame</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>(),
+                <span class='ident'>start_ms</span>: <span class='ident'>start_ms</span>,
+                <span class='ident'>end_ms</span>: <span class='ident'>end_ms</span>,
+                <span class='ident'>position_ms</span>: <span class='number'>0.0</span>,
             };
 
-            <span class='kw'>if</span> <span class='ident'>bytes_read</span> <span class='op'>==</span> <span class='number'>0</span> {
-                <span class='kw'>return</span> <span class='ident'>MadFlow</span>::<span class='ident'>Stop</span>;
-            }
+        <span class='kw'>let</span> <span class='ident'>bytes_read</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>new_decoder</span>.<span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>new_decoder</span>.<span class='ident'>buffer</span>));
 
-            <span class='kw'>let</span> <span class='ident'>fresh_byte_count</span> <span class='op'>=</span> (<span class='ident'>bytes_read</span> <span class='op'>+</span> <span class='ident'>unused_byte_count</span>) <span class='kw'>as</span> <span class='ident'>u64</span>;
-            <span class='ident'>mad_stream_buffer</span>(<span class='ident'>stream</span>, (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>buffer</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>fresh_byte_count</span>);
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>mad_stream_init</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>new_decoder</span>.<span class='ident'>stream</span>);
+            <span class='ident'>mad_frame_init</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>new_decoder</span>.<span class='ident'>frame</span>);
+            <span class='ident'>mad_synth_init</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>new_decoder</span>.<span class='ident'>synth</span>);
+            <span class='ident'>mad_stream_buffer</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>new_decoder</span>.<span class='ident'>stream</span>,
+                              <span class='ident'>new_decoder</span>.<span class='ident'>buffer</span>.<span class='ident'>as_ptr</span>(),
+                              <span class='ident'>bytes_read</span> <span class='kw'>as</span> <span class='ident'>u64</span>);
         }
-    }
-    <span class='ident'>MadFlow</span>::<span class='ident'>Continue</span>
-}
 
-<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>header_cb</span>(<span class='ident'>msg_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>, <span class='ident'>header</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadHeader</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span> {
-    <span class='kw'>unsafe</span> {
-        <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span>(<span class='ident'>msg_ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>MadMessage</span>);
-        <span class='ident'>msg</span>.<span class='ident'>current_time</span> <span class='op'>+=</span> (<span class='ident'>header</span>.<span class='ident'>duration</span>.<span class='ident'>seconds</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>*</span> <span class='number'>1000.0</span> <span class='op'>+</span>
-                            (<span class='ident'>header</span>.<span class='ident'>duration</span>.<span class='ident'>fraction</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>/</span> <span class='number'>352800.0</span>;
-        <span class='kw'>match</span> (<span class='ident'>msg</span>.<span class='ident'>start_time</span>, <span class='ident'>msg</span>.<span class='ident'>end_time</span>) {
-            (<span class='prelude-val'>Some</span>(<span class='ident'>start_time</span>), <span class='prelude-val'>Some</span>(<span class='ident'>end_time</span>)) <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='ident'>msg</span>.<span class='ident'>current_time</span> <span class='op'>&gt;</span> <span class='ident'>end_time</span> {
-                    <span class='ident'>MadFlow</span>::<span class='ident'>Stop</span>
-                } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>msg</span>.<span class='ident'>current_time</span> <span class='op'>&gt;=</span> <span class='ident'>start_time</span> {
-                    <span class='ident'>MadFlow</span>::<span class='ident'>Continue</span>
-                } <span class='kw'>else</span> {
-                    <span class='ident'>MadFlow</span>::<span class='ident'>Ignore</span>
+        <span class='prelude-val'>Ok</span>(<span class='ident'>new_decoder</span>)
+    }
+
+    <span class='doccomment'>/// Decode a file in full</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>decode</span>(<span class='ident'>reader</span>: <span class='ident'>R</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
+        <span class='ident'>Decoder</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
+    }
+
+    <span class='doccomment'>/// Decode part of a file from `start_time` to `end_time`, measured in milliseconds</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>decode_interval</span>(<span class='ident'>reader</span>: <span class='ident'>R</span>, <span class='ident'>start_time</span>: <span class='ident'>f64</span>, <span class='ident'>end_time</span>: <span class='ident'>f64</span>)
+            <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
+        <span class='ident'>Decoder</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>, <span class='prelude-val'>Some</span>(<span class='ident'>start_time</span>), <span class='prelude-val'>Some</span>(<span class='ident'>end_time</span>))
+    }
+
+    <span class='doccomment'>/// Get the next decoding result, either a `Frame` or a `SimplemadError`</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>start_ms</span> {
+            <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>&lt;</span> <span class='ident'>t</span> <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>seek_to_start</span>() },
+            _ <span class='op'>=&gt;</span> {},
+        }
+
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>end_ms</span> {
+            <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>&gt;</span> <span class='ident'>t</span> <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>EOF</span>) },
+            _ <span class='op'>=&gt;</span> {},
+        }
+
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>decode_frame</span>() {
+            <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>) <span class='op'>=&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>+=</span> <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>);
+                <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>)
+            },
+            <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>MadError</span>::<span class='ident'>BufLen</span>)) <span class='op'>=&gt;</span> {
+                <span class='comment'>// Refill buffer and try again</span>
+                <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span> <span class='op'>=</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span>;
+                <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>refill_buffer</span>() {
+                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Read</span>(<span class='ident'>e</span>)),
+                    <span class='prelude-val'>Ok</span>(<span class='number'>0</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>EOF</span>),
+                    <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>decode_frame</span>(),
                 }
             },
-            _ <span class='op'>=&gt;</span> <span class='ident'>MadFlow</span>::<span class='ident'>Continue</span>,
+            <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>e</span>)) <span class='op'>=&gt;</span> {
+                <span class='kw'>if</span> <span class='ident'>error_is_recoverable</span>(<span class='kw-2'>&amp;</span><span class='ident'>e</span>) {
+                    <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span> <span class='op'>=</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span>;
+                }
+                <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>e</span>))
+            },
+            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>),
         }
     }
-}
 
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
-<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>error_cb</span>(<span class='ident'>msg_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>,
-                   <span class='ident'>stream</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadStream</span>,
-                   <span class='ident'>frame</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span> {
-    <span class='kw'>unsafe</span> {
-        <span class='kw'>let</span> <span class='ident'>error_type</span> <span class='op'>=</span> <span class='ident'>stream</span>.<span class='ident'>error</span>.<span class='ident'>clone</span>();
-        <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span>(<span class='ident'>msg_ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>MadMessage</span>);
-        <span class='kw'>match</span> (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>sender</span>.<span class='ident'>send</span>(<span class='prelude-val'>Err</span>(<span class='ident'>error_type</span>)) {
-            <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> {
-                <span class='ident'>MadFlow</span>::<span class='ident'>Continue</span>
+    <span class='kw'>fn</span> <span class='ident'>seek_to_start</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>start_ms</span> {
+            <span class='prelude-val'>Some</span>(<span class='ident'>start_time</span>) <span class='op'>=&gt;</span> {
+                <span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>&lt;</span> <span class='ident'>start_time</span> {
+                    <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>decode_header</span>() {
+                        <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>+=</span> <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>) },
+                        <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>MadError</span>::<span class='ident'>BufLen</span>)) <span class='op'>=&gt;</span> {
+                            <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>refill_buffer</span>() {
+                                <span class='prelude-val'>Ok</span>(<span class='number'>0</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>EOF</span>) },
+                                <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Read</span>(<span class='ident'>e</span>)) },
+                                <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> { },
+                            }
+                        },
+                        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>),
+                    }
+                }
             },
-            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                <span class='ident'>MadFlow</span>::<span class='ident'>Stop</span>
-            },
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {},
+        }
+
+        <span class='self'>self</span>.<span class='ident'>get_frame</span>()
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>decode_header</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>mad_header_decode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>stream</span>);
+        }
+
+        <span class='kw'>let</span> <span class='ident'>error</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span>.<span class='ident'>clone</span>();
+
+        <span class='kw'>if</span> <span class='ident'>error</span> <span class='op'>==</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span> {
+            <span class='prelude-val'>Ok</span>(())
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>error_is_recoverable</span>(<span class='kw-2'>&amp;</span><span class='ident'>error</span>) {
+            <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span> <span class='op'>=</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span>;
+            <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>error</span>))
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>error</span>))
         }
     }
-}
 
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
-<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>output_cb</span>(<span class='ident'>msg_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>, <span class='ident'>header</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadHeader</span>, <span class='ident'>pcm</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadPcm</span>) <span class='op'>-&gt;</span> <span class='ident'>MadFlow</span> {
-    <span class='kw'>unsafe</span> {
-        <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span>(<span class='ident'>msg_ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>MadMessage</span>);
+    <span class='kw'>fn</span> <span class='ident'>decode_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>mad_frame_decode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>frame</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>stream</span>);
+        }
+
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span> <span class='op'>!=</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span>.<span class='ident'>clone</span>()));
+        }
+
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>mad_synth_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>synth</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>frame</span>);
+        }
+
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span> <span class='op'>!=</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span>.<span class='ident'>clone</span>()));
+        }
+
+        <span class='kw'>let</span> <span class='ident'>pcm</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>synth</span>.<span class='ident'>pcm</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>samples</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+
         <span class='kw'>for</span> <span class='ident'>channel_idx</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>pcm</span>.<span class='ident'>channels</span> <span class='kw'>as</span> <span class='ident'>usize</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>channel</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>pcm</span>.<span class='ident'>length</span> <span class='kw'>as</span> <span class='ident'>usize</span>);
             <span class='kw'>for</span> <span class='ident'>sample_idx</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>pcm</span>.<span class='ident'>length</span> <span class='kw'>as</span> <span class='ident'>usize</span> {
@@ -1171,43 +883,130 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
             }
             <span class='ident'>samples</span>.<span class='ident'>push</span>(<span class='ident'>channel</span>);
         }
+
         <span class='kw'>let</span> <span class='ident'>frame</span> <span class='op'>=</span>
-            <span class='ident'>Frame</span> {<span class='ident'>sample_rate</span>: <span class='ident'>pcm</span>.<span class='ident'>sample_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
+            <span class='ident'>Frame</span> {<span class='ident'>sample_rate</span>: <span class='self'>self</span>.<span class='ident'>synth</span>.<span class='ident'>pcm</span>.<span class='ident'>sample_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
                    <span class='ident'>samples</span>: <span class='ident'>samples</span>,
-                   <span class='ident'>position</span>: <span class='ident'>msg</span>.<span class='ident'>current_time</span> <span class='op'>-</span>
-                             (<span class='ident'>header</span>.<span class='ident'>duration</span>.<span class='ident'>seconds</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>*</span> <span class='number'>1000.0</span> <span class='op'>-</span>
-                             (<span class='ident'>header</span>.<span class='ident'>duration</span>.<span class='ident'>fraction</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>/</span> <span class='number'>352800.0</span>};
-        <span class='kw'>match</span> (<span class='op'>*</span><span class='ident'>msg</span>).<span class='ident'>sender</span>.<span class='ident'>send</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>)) {
-            <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> {
-                <span class='ident'>MadFlow</span>::<span class='ident'>Continue</span>
-            },
-            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
-                <span class='ident'>MadFlow</span>::<span class='ident'>Stop</span>
-            },
+                   <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>-</span>
+                             (<span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>duration</span>.<span class='ident'>seconds</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>*</span> <span class='number'>1000.0</span> <span class='op'>-</span>
+                             (<span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>duration</span>.<span class='ident'>fraction</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>/</span> <span class='number'>352800.0</span>};
+        <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>refill_buffer</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span>, <span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>buffer_size</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>len</span>();
+        <span class='kw'>let</span> <span class='ident'>next_frame_position</span> <span class='op'>=</span> (<span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>next_frame</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>buffer</span>) <span class='kw'>as</span> <span class='ident'>usize</span>;
+        <span class='kw'>let</span> <span class='ident'>unused_byte_count</span> <span class='op'>=</span> <span class='ident'>buffer_size</span> <span class='op'>-</span> <span class='ident'>min</span>(<span class='ident'>next_frame_position</span>, <span class='ident'>buffer_size</span>);
+
+        <span class='comment'>// Shift unused data to front of buffer</span>
+        <span class='kw'>for</span> <span class='ident'>idx</span> <span class='kw'>in</span> <span class='number'>0</span> .. <span class='ident'>unused_byte_count</span> {
+            <span class='self'>self</span>.<span class='ident'>buffer</span>[<span class='ident'>idx</span>] <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>[<span class='ident'>idx</span> <span class='op'>+</span> <span class='ident'>next_frame_position</span>];
+        }
+
+        <span class='comment'>// Refill rest of buffer</span>
+        <span class='kw'>let</span> <span class='ident'>bytes_read</span> <span class='op'>=</span>
+            <span class='kw'>if</span> <span class='ident'>next_frame_position</span> <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>buffer</span>))
+            } <span class='kw'>else</span> {
+                <span class='kw'>let</span> <span class='ident'>slice</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>buffer</span>[<span class='ident'>unused_byte_count</span>..<span class='ident'>buffer_size</span>];
+                <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='ident'>slice</span>))
+            };
+
+        <span class='kw'>if</span> <span class='ident'>bytes_read</span> <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='number'>0</span>);
+        }
+
+        <span class='kw'>let</span> <span class='ident'>fresh_byte_count</span> <span class='op'>=</span> (<span class='ident'>bytes_read</span> <span class='op'>+</span> <span class='ident'>unused_byte_count</span>) <span class='kw'>as</span> <span class='ident'>u64</span>;
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>mad_stream_buffer</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>stream</span>, <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>fresh_byte_count</span>);
+        }
+
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span> <span class='op'>==</span> <span class='ident'>MadError</span>::<span class='ident'>BufLen</span> {
+            <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span> <span class='op'>=</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span>;
+        }
+
+        <span class='prelude-val'>Ok</span>(<span class='ident'>bytes_read</span>)
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;&gt;</span> {
+        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>error_is_recoverable</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>error</span>) {
+            <span class='kw'>return</span> <span class='prelude-val'>None</span>;
+        }
+
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>get_frame</span>() {
+            <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>f</span>)),
+            <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>EOF</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
+            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
+                <span class='prelude-val'>Some</span>(<span class='prelude-val'>Err</span>(<span class='ident'>e</span>))
+            }
         }
     }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>mad_stream_finish</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>stream</span>);
+            <span class='ident'>mad_frame_finish</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>frame</span>);
+            <span class='comment'>// mad_synth_finish is present in the libmad docs</span>
+            <span class='comment'>// but is defined as nothing in the library</span>
+            <span class='comment'>// mad_synth_finish(&amp;mut self.synth);</span>
+        }
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>error_is_recoverable</span>(<span class='ident'>err</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadError</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='ident'>err</span> <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='ident'>MadError</span>::<span class='prelude-val'>None</span> <span class='op'>||</span> (<span class='ident'>err</span>.<span class='ident'>clone</span>() <span class='kw'>as</span> <span class='ident'>u16</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xff00</span> <span class='op'>!=</span> <span class='number'>0</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>frame_duration</span>(<span class='ident'>frame</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadFrame</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='kw'>let</span> <span class='ident'>duration</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>duration</span>;
+    (<span class='ident'>duration</span>.<span class='ident'>seconds</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>*</span> <span class='number'>1000.0</span> <span class='op'>+</span> (<span class='ident'>duration</span>.<span class='ident'>fraction</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>/</span> <span class='number'>352800.0</span>
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>::<span class='ident'>Receiver</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
 
-    <span class='kw'>fn</span> <span class='ident'>create_decoder</span>(<span class='ident'>path_str</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>MadError</span><span class='op'>&gt;&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
-        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>path_str</span>);
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_decode_interval</span>() {
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
-        <span class='ident'>decode</span>(<span class='ident'>file</span>)
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>, <span class='number'>3000.0</span>, <span class='number'>4000.0</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
+
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
+            <span class='kw'>match</span> <span class='ident'>item</span> {
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+                    <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span>; }
+                },
+                <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
+                    <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
+                }
+            }
+        }
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>error_count</span>, <span class='number'>0</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>frame_count</span>, <span class='number'>39</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>constant_stereo_128</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span>; }
@@ -1226,11 +1025,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>constant_joint_stereo_128</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/constant_joint_stereo_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_joint_stereo_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span>; }
@@ -1249,11 +1050,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>average_stereo_128</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/average_stereo_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/average_stereo_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span>; }
@@ -1272,11 +1075,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>constant_stereo_320</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_320.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_320.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span>; }
@@ -1295,11 +1100,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>variable_joint_stereo</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/variable_joint_stereo.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/variable_joint_stereo.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span> }
@@ -1318,11 +1125,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>variable_stereo</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/variable_stereo.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/variable_stereo.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span> }
@@ -1341,11 +1150,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>constant_stereo_16</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_16.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_16.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span>; }
@@ -1364,11 +1175,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>constant_single_channel_128</span>() {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/constant_single_channel_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_single_channel_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
+        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
             <span class='kw'>match</span> <span class='ident'>item</span> {
                 <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>frame_count</span> <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='ident'>error_count</span> <span class='op'>+=</span> <span class='number'>1</span>; }
@@ -1386,11 +1199,16 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.iter()
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_readme_code</span> () {
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>create_decoder</span>(<span class='string'>&quot;sample_mp3s/constant_joint_stereo_128.mp3&quot;</span>);
+    <span class='kw'>fn</span> <span class='ident'>test_readme_md</span>() {
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
 
-        <span class='kw'>for</span> <span class='ident'>item</span> <span class='kw'>in</span> <span class='ident'>decoder</span>.<span class='ident'>iter</span>() {
-            <span class='kw'>match</span> <span class='ident'>item</span> {
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode</span>(<span class='ident'>file</span>).<span class='ident'>unwrap</span>();
+
+        <span class='kw'>for</span> <span class='ident'>decoding_result</span> <span class='kw'>in</span> <span class='ident'>decoder</span> {
+            <span class='kw'>match</span> <span class='ident'>decoding_result</span> {
                 <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Error: {:?}&quot;</span>, <span class='ident'>e</span>),
                 <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>) <span class='op'>=&gt;</span> {
                   <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Frame sample rate: {}&quot;</span>, <span class='ident'>frame</span>.<span class='ident'>sample_rate</span>);

@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `decode_interval` fn in crate `simplemad`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, decode_interval">
+    <meta name="description" content="API documentation for the Rust `find_library` fn in crate `pkg_config`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, find_library">
 
-    <title>simplemad::decode_interval - Rust</title>
+    <title>pkg_config::find_library - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='index.html'>simplemad</a></p><script>window.sidebarCurrent = {name: 'decode_interval', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>pkg_config</a></p><script>window.sidebarCurrent = {name: 'find_library', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,12 +41,12 @@
     </nav>
 
     <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'>Function <a href='index.html'>simplemad</a>::<wbr><a class='fn' href=''>decode_interval</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Function <a href='index.html'>pkg_config</a>::<wbr><a class='fn' href=''>find_library</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1152' class='srclink' href='../src/simplemad/lib.rs.html#334-337' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn decode_interval&lt;R&gt;(reader: R, start_time: <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>, end_time: <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../simplemad/struct.Decoder.html' title='simplemad::Decoder'>Decoder</a>&lt;R&gt;, <a class='enum' href='../simplemad/enum.SimplemadError.html' title='simplemad::SimplemadError'>SimplemadError</a>&gt; <span class='where'>where R: <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Read.html' title='std::io::Read'>Read</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'static</span></pre><div class='docblock'><p>Decode part of a file from <code>start_time</code> to <code>end_time</code>, measured in milliseconds</p>
+        </span><a id='src-199' class='srclink' href='../src/pkg_config/lib.rs.html#95-97' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn find_library(name: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../pkg_config/struct.Library.html' title='pkg_config::Library'>Library</a>, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</pre><div class='docblock'><p>Simple shortcut for using all default options for finding a library.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 
@@ -98,7 +98,7 @@
 
     <script>
         window.rootPath = "../";
-        window.currentCrate = "simplemad";
+        window.currentCrate = "pkg_config";
         window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>
