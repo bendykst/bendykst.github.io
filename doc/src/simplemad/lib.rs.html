@@ -859,6 +859,44 @@
 <span id="817">817</span>
 <span id="818">818</span>
 <span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
 This crate provides an interface to libmad, the MPEG audio decoding library.
@@ -917,6 +955,12 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Frame</span> {
     <span class='doccomment'>/// Number of samples per second</span>
     <span class='kw'>pub</span> <span class='ident'>sample_rate</span>: <span class='ident'>u32</span>,
+    <span class='doccomment'>/// Stream bit rate</span>
+    <span class='kw'>pub</span> <span class='ident'>bit_rate</span>: <span class='ident'>u32</span>,
+    <span class='doccomment'>/// Audio layer (I, II or III)</span>
+    <span class='kw'>pub</span> <span class='ident'>layer</span>: <span class='ident'>MadLayer</span>,
+    <span class='doccomment'>/// Single Channel, Dual Channel, Joint Stereo or Stereo</span>
+    <span class='kw'>pub</span> <span class='ident'>mode</span>: <span class='ident'>MadMode</span>,
     <span class='doccomment'>/// Samples are organized into a vector of channels. For</span>
     <span class='doccomment'>/// stereo, the left channel is channel 0.</span>
     <span class='kw'>pub</span> <span class='ident'>samples</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>MadFixed32</span><span class='op'>&gt;&gt;</span>,
@@ -1066,6 +1110,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
         <span class='kw'>if</span> <span class='ident'>error</span> <span class='op'>==</span> <span class='ident'>MadError</span>::<span class='prelude-val'>None</span> {
             <span class='kw'>let</span> <span class='ident'>frame</span> <span class='op'>=</span>
                 <span class='ident'>Frame</span> {<span class='ident'>sample_rate</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>sample_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
+                       <span class='ident'>mode</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>mode</span>.<span class='ident'>clone</span>(),
+                       <span class='ident'>layer</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>layer</span>.<span class='ident'>clone</span>(),
+                       <span class='ident'>bit_rate</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>bit_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
                        <span class='ident'>samples</span>: <span class='ident'>Vec</span>::<span class='ident'>new</span>(),
                        <span class='ident'>duration</span>: <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>) <span class='kw'>as</span> <span class='ident'>f32</span>,
                        <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position_ms</span>};
@@ -1110,9 +1157,12 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
 
         <span class='kw'>let</span> <span class='ident'>frame</span> <span class='op'>=</span>
             <span class='ident'>Frame</span> {<span class='ident'>sample_rate</span>: <span class='ident'>pcm</span>.<span class='ident'>sample_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
-                   <span class='ident'>samples</span>: <span class='ident'>samples</span>,
                    <span class='ident'>duration</span>: <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>) <span class='kw'>as</span> <span class='ident'>f32</span>,
-                   <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position_ms</span>};
+                   <span class='ident'>mode</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>mode</span>.<span class='ident'>clone</span>(),
+                   <span class='ident'>layer</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>layer</span>.<span class='ident'>clone</span>(),
+                   <span class='ident'>bit_rate</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>bit_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
+                   <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position_ms</span>,
+                   <span class='ident'>samples</span>: <span class='ident'>samples</span>};
         <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>)
     }
 
@@ -1309,6 +1359,7 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='ident'>simplemad_sys</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufReader</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
@@ -1345,6 +1396,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 },
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>Stereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>bit_rate</span>, <span class='number'>128000</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>0</span>);
                 }
@@ -1371,6 +1425,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>Stereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>bit_rate</span>, <span class='number'>128000</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
                 }
@@ -1471,6 +1528,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>Stereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>bit_rate</span>, <span class='number'>128000</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
                 }
@@ -1496,6 +1556,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>JointStereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>bit_rate</span>, <span class='number'>128000</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
                 }
@@ -1521,6 +1584,8 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>Stereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
                 }
@@ -1546,6 +1611,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>Stereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>bit_rate</span>, <span class='number'>320000</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
                 }
@@ -1571,6 +1639,8 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>JointStereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
                 }
@@ -1621,6 +1691,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>24000</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>Stereo</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>bit_rate</span>, <span class='number'>16000</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>576</span>);
                 }
@@ -1646,6 +1719,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>frame_count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>sample_rate</span>, <span class='number'>44100</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>mode</span>, <span class='ident'>MadMode</span>::<span class='ident'>SingleChannel</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>layer</span>, <span class='ident'>MadLayer</span>::<span class='ident'>LayerIII</span>);
+                    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>bit_rate</span>, <span class='number'>128000</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>.<span class='ident'>len</span>(), <span class='number'>1</span>);
                     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>f</span>.<span class='ident'>samples</span>[<span class='number'>0</span>].<span class='ident'>len</span>(), <span class='number'>1152</span>);
                 },

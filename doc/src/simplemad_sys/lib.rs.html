@@ -647,22 +647,22 @@
 }
 
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MadLayer</span> {
-    <span class='ident'>Layer1</span> <span class='op'>=</span> <span class='number'>1</span>,
-    <span class='ident'>Layer2</span> <span class='op'>=</span> <span class='number'>2</span>,
-    <span class='ident'>Layer3</span> <span class='op'>=</span> <span class='number'>3</span>,
+    <span class='ident'>LayerI</span> <span class='op'>=</span> <span class='number'>1</span>,
+    <span class='ident'>LayerII</span> <span class='op'>=</span> <span class='number'>2</span>,
+    <span class='ident'>LayerIII</span> <span class='op'>=</span> <span class='number'>3</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>MadLayer</span> {
     <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>MadLayer</span> {
-        <span class='ident'>MadLayer</span>::<span class='ident'>Layer1</span>
+        <span class='ident'>MadLayer</span>::<span class='ident'>LayerI</span>
     }
 }
 
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MadMode</span> {
     <span class='ident'>SingleChannel</span> <span class='op'>=</span> <span class='number'>0</span>,

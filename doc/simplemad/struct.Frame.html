@@ -45,9 +45,12 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-12' class='srclink' href='../src/simplemad/lib.rs.html#55-65' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-12' class='srclink' href='../src/simplemad/lib.rs.html#55-71' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Frame {
     pub sample_rate: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>,
+    pub bit_rate: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>,
+    pub layer: <a class='enum' href='../simplemad_sys/enum.MadLayer.html' title='simplemad_sys::MadLayer'>MadLayer</a>,
+    pub mode: <a class='enum' href='../simplemad_sys/enum.MadMode.html' title='simplemad_sys::MadMode'>MadMode</a>,
     pub samples: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../simplemad/struct.MadFixed32.html' title='simplemad::MadFixed32'>MadFixed32</a>&gt;&gt;,
     pub duration: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,
     pub position: <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>,
@@ -55,6 +58,12 @@
 </div><h2 class='fields'>Fields</h2>
 <table><tr class='stab '>
                                   <td id='structfield.sample_rate'><code>sample_rate</code></td><td><div class='docblock'><p>Number of samples per second</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.bit_rate'><code>bit_rate</code></td><td><div class='docblock'><p>Stream bit rate</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.layer'><code>layer</code></td><td><div class='docblock'><p>Audio layer (I, II or III)</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.mode'><code>mode</code></td><td><div class='docblock'><p>Single Channel, Dual Channel, Joint Stereo or Stereo</p>
 </div></td></tr><tr class='stab '>
                                   <td id='structfield.samples'><code>samples</code></td><td><div class='docblock'><p>Samples are organized into a vector of channels. For
 stereo, the left channel is channel 0.</p>
