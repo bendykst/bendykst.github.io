@@ -45,19 +45,19 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1106' class='srclink' href='../src/simplemad_sys/lib.rs.html#157-172' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1033' class='srclink' href='../src/simplemad_sys/lib.rs.html#157-172' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct MadStream {
-    pub buffer: <a class='type' href='../libc/types/os/arch/c95/type.size_t.html' title='libc::types::os::arch::c95::size_t'>size_t</a>,
-    pub buff_end: <a class='type' href='../libc/types/os/arch/c95/type.size_t.html' title='libc::types::os::arch::c95::size_t'>size_t</a>,
+    pub buffer: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></a>,
+    pub buff_end: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></a>,
     pub skip_len: <a class='type' href='../simplemad_sys/type.c_ulong.html' title='simplemad_sys::c_ulong'>c_ulong</a>,
     pub sync: <a class='type' href='../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>,
     pub free_rate: <a class='type' href='../simplemad_sys/type.c_ulong.html' title='simplemad_sys::c_ulong'>c_ulong</a>,
-    pub this_frame: <a class='type' href='../libc/types/os/arch/c95/type.size_t.html' title='libc::types::os::arch::c95::size_t'>size_t</a>,
-    pub next_frame: <a class='type' href='../libc/types/os/arch/c95/type.size_t.html' title='libc::types::os::arch::c95::size_t'>size_t</a>,
+    pub this_frame: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></a>,
+    pub next_frame: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></a>,
     pub ptr: <a class='struct' href='../simplemad_sys/struct.MadBitPtr.html' title='simplemad_sys::MadBitPtr'>MadBitPtr</a>,
     pub anc_ptr: <a class='struct' href='../simplemad_sys/struct.MadBitPtr.html' title='simplemad_sys::MadBitPtr'>MadBitPtr</a>,
     pub anc_bitlen: <a class='type' href='../libc/types/os/arch/c95/type.c_uint.html' title='libc::types::os::arch::c95::c_uint'>c_uint</a>,
-    pub buffer_mdlen: <a class='type' href='../libc/types/os/arch/c95/type.size_t.html' title='libc::types::os::arch::c95::size_t'>size_t</a>,
+    pub buffer_mdlen: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></a>,
     pub md_len: <a class='type' href='../libc/types/os/arch/c95/type.c_uint.html' title='libc::types::os::arch::c95::c_uint'>c_uint</a>,
     pub options: <a class='type' href='../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>,
     pub error: <a class='enum' href='../simplemad_sys/enum.MadError.html' title='simplemad_sys::MadError'>MadError</a>,
@@ -76,10 +76,7 @@
                                   <td id='structfield.buffer_mdlen'><code>buffer_mdlen</code></td><td></td></tr><tr class='stab '>
                                   <td id='structfield.md_len'><code>md_len</code></td><td></td></tr><tr class='stab '>
                                   <td id='structfield.options'><code>options</code></td><td></td></tr><tr class='stab '>
-                                  <td id='structfield.error'><code>error</code></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a></code></h4>
-<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/default/trait.Default.html#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a></code></h4>
+                                  <td id='structfield.error'><code>error</code></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/default/trait.Default.html#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../simplemad_sys/struct.MadStream.html' title='simplemad_sys::MadStream'>MadStream</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 
