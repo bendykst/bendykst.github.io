@@ -954,47 +954,83 @@
 <span id="912">912</span>
 <span id="913">913</span>
 <span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
-This crate provides an interface to libmad, the MPEG audio decoding library.
+ This crate provides an interface to libmad, the MPEG audio decoding library.
 
-To begin, create a `Decoder` from a byte-oriented source using `Decoder::decode`
-or `Decoder::decode_interval`. Fetch results using `get_frame` or the `Iterator`
-interface. MP3 files often begin or end with metadata, which will cause libmad
-to produce errors. It is safe to ignore these errors until libmad reaches the
-start of the audio data or the end of the file.
+ To begin, create a `Decoder` from a byte-oriented source using `Decoder::decode`
+ or `Decoder::decode_interval`. Fetch results using `get_frame` or the `Iterator`
+ interface. MP3 files often begin or end with metadata, which will cause libmad
+ to produce errors. It is safe to ignore these errors until libmad reaches the
+ start of the audio data or the end of the file.
 
-# Examples
-```no_run
-#![allow(unused_variables)]
-use simplemad::{Decoder, Frame};
-use std::fs::File;
-use std::path::Path;
+ # Examples
+ ```no_run
+ #![allow(unused_variables)]
+ use simplemad::{Decoder, Frame};
+ use std::time::Duration;
+ use std::fs::File;
+ use std::path::Path;
 
-let path = Path::new(&quot;sample_mp3s/constant_stereo_128.mp3&quot;);
-let file = File::open(&amp;path).unwrap();
-let file_b = File::open(&amp;path).unwrap();
-let decoder = Decoder::decode(file).unwrap();
+ let path = Path::new(&quot;sample_mp3s/constant_stereo_128.mp3&quot;);
+ let file = File::open(&amp;path).unwrap();
+ let decoder = Decoder::decode(file).unwrap();
 
-for decoding_result in decoder {
-    match decoding_result {
-        Err(e) =&gt; println!(&quot;Error: {:?}&quot;, e),
-        Ok(frame) =&gt; {
-            println!(&quot;Frame sample rate: {}&quot;, frame.sample_rate);
-            println!(&quot;First audio sample (left channel): {:?}&quot;, frame.samples[0][0]);
-            println!(&quot;First audio sample (right channel): {:?}&quot;, frame.samples[1][0]);
-        },
-    }
-}
+ for decoding_result in decoder {
+     match decoding_result {
+         Err(e) =&gt; println!(&quot;Error: {:?}&quot;, e),
+         Ok(frame) =&gt; {
+             println!(&quot;Frame sample rate: {}&quot;, frame.sample_rate);
+             println!(&quot;First audio sample (left channel): {:?}&quot;, frame.samples[0][0]);
+             println!(&quot;First audio sample (right channel): {:?}&quot;, frame.samples[1][0]);
+         },
+     }
+ }
 
-// Decode the interval from 1s to 2s (to the nearest frame),
-let partial_decoder = Decoder::decode_interval(file_b, 1_000_f64, 2_000_f64);
-let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
-                                        .filter_map(|r| match r {
-                                            Ok(f) =&gt; Some(f),
-                                            Err(_) =&gt; None})
-                                        .collect();
-```
+ // Decode the interval from 1s to 2s (to the nearest frame),
+ let file_b = File::open(&amp;path).unwrap();
+ let partial_decoder = Decoder::decode_interval(file_b,
+                                                Duration::from_secs(1),
+                                                Duration::from_secs(2));
+ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
+                                         .filter_map(|r| match r {
+                                             Ok(f) =&gt; Some(f),
+                                             Err(_) =&gt; None})
+                                         .collect();
+
+ // Decode only the headers to quickly calculate the file&#39;s length
+ let file_c = File::open(&amp;path).unwrap();
+ let headers = Decoder::decode_headers(file_c).unwrap();
+ let duration = headers.filter_map(|r| {
+                           match r {
+                               Ok(f) =&gt; Some(f.duration),
+                               Err(_) =&gt; None,
+                           }
+                       }).fold(Duration::new(0, 0), |acc, dtn| acc + dtn);
 */</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;simplemad&quot;</span>]</span>
@@ -1005,10 +1041,10 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
         <span class='ident'>unused_import_braces</span>)]</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>simplemad_sys</span>;
-
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Read</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::{<span class='ident'>min</span>, <span class='ident'>max</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>time</span>::<span class='ident'>Duration</span>;
 <span class='kw'>use</span> <span class='ident'>simplemad_sys</span>::<span class='op'>*</span>;
 
 <span class='doccomment'>/// A decoded frame</span>
@@ -1025,10 +1061,10 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='doccomment'>/// Samples are organized into a vector of channels. For</span>
     <span class='doccomment'>/// stereo, the left channel is channel 0.</span>
     <span class='kw'>pub</span> <span class='ident'>samples</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>MadFixed32</span><span class='op'>&gt;&gt;</span>,
-    <span class='doccomment'>/// The duration of the frame in milliseconds</span>
-    <span class='kw'>pub</span> <span class='ident'>duration</span>: <span class='ident'>f32</span>,
-    <span class='doccomment'>/// The position in milliseconds at the start of the frame</span>
-    <span class='kw'>pub</span> <span class='ident'>position</span>: <span class='ident'>f64</span>,
+    <span class='doccomment'>/// The duration of the frame</span>
+    <span class='kw'>pub</span> <span class='ident'>duration</span>: <span class='ident'>Duration</span>,
+    <span class='doccomment'>/// The position at the start of the frame</span>
+    <span class='kw'>pub</span> <span class='ident'>position</span>: <span class='ident'>Duration</span>,
 }
 
 <span class='doccomment'>/// An interface for the decoding operation</span>
@@ -1044,15 +1080,15 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='ident'>stream</span>: <span class='ident'>MadStream</span>,
     <span class='ident'>synth</span>: <span class='ident'>MadSynth</span>,
     <span class='ident'>frame</span>: <span class='ident'>MadFrame</span>,
-    <span class='ident'>start_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
-    <span class='ident'>end_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
-    <span class='ident'>position_ms</span>: <span class='ident'>f64</span>,
+    <span class='ident'>start_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Duration</span><span class='op'>&gt;</span>,
+    <span class='ident'>end_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Duration</span><span class='op'>&gt;</span>,
+    <span class='ident'>position</span>: <span class='ident'>Duration</span>,
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>io</span>::<span class='ident'>Read</span> {
     <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>reader</span>: <span class='ident'>R</span>,
-           <span class='ident'>start_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
-           <span class='ident'>end_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,
+           <span class='ident'>start_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Duration</span><span class='op'>&gt;</span>,
+           <span class='ident'>end_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Duration</span><span class='op'>&gt;</span>,
            <span class='ident'>headers_only</span>: <span class='ident'>bool</span>)
            <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new_decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span> {
@@ -1062,9 +1098,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
             <span class='ident'>stream</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>(),
             <span class='ident'>synth</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>(),
             <span class='ident'>frame</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>(),
-            <span class='ident'>start_ms</span>: <span class='ident'>start_ms</span>,
-            <span class='ident'>end_ms</span>: <span class='ident'>end_ms</span>,
-            <span class='ident'>position_ms</span>: <span class='number'>0.0</span>,
+            <span class='ident'>start_time</span>: <span class='ident'>start_time</span>,
+            <span class='ident'>end_time</span>: <span class='ident'>end_time</span>,
+            <span class='ident'>position</span>: <span class='ident'>Duration</span>::<span class='ident'>new</span>(<span class='number'>0</span>, <span class='number'>0</span>),
         };
 
         <span class='kw'>let</span> <span class='ident'>bytes_read</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>new_decoder</span>.<span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>new_decoder</span>.<span class='ident'>buffer</span>));
@@ -1091,25 +1127,25 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
         <span class='ident'>Decoder</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>, <span class='boolval'>true</span>)
     }
 
-    <span class='doccomment'>/// Decode part of a file from `start_time` to `end_time`, measured in milliseconds</span>
+    <span class='doccomment'>/// Decode part of a file from `start_time` to `end_time`</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>decode_interval</span>(<span class='ident'>reader</span>: <span class='ident'>R</span>,
-                           <span class='ident'>start_time</span>: <span class='ident'>f64</span>,
-                           <span class='ident'>end_time</span>: <span class='ident'>f64</span>)
+                           <span class='ident'>start_time</span>: <span class='ident'>Duration</span>,
+                           <span class='ident'>end_time</span>: <span class='ident'>Duration</span>)
                            <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Decoder</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
         <span class='ident'>Decoder</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>, <span class='prelude-val'>Some</span>(<span class='ident'>start_time</span>), <span class='prelude-val'>Some</span>(<span class='ident'>end_time</span>), <span class='boolval'>false</span>)
     }
 
     <span class='doccomment'>/// Get the next decoding result, either a `Frame` or a `SimplemadError`</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>start_ms</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>&lt;</span> <span class='ident'>t</span> <span class='op'>=&gt;</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>start_time</span> {
+            <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>position</span> <span class='op'>&lt;</span> <span class='ident'>t</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>seek_to_start</span>();
             }
             _ <span class='op'>=&gt;</span> {}
         }
 
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>end_ms</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>&gt;</span> <span class='ident'>t</span> <span class='op'>=&gt;</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>end_time</span> {
+            <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>position</span> <span class='op'>&gt;=</span> <span class='ident'>t</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>EOF</span>);
             }
             _ <span class='op'>=&gt;</span> {}
@@ -1123,7 +1159,7 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
 
         <span class='kw'>match</span> <span class='ident'>decoding_result</span> {
             <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>) <span class='op'>=&gt;</span> {
-                <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>+=</span> <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>);
+                <span class='self'>self</span>.<span class='ident'>position</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>position</span> <span class='op'>+</span> <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>);
                 <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>)
             }
             <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>MadError</span>::<span class='ident'>BufLen</span>)) <span class='op'>=&gt;</span> {
@@ -1146,13 +1182,13 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     }
 
     <span class='kw'>fn</span> <span class='ident'>seek_to_start</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>start_ms</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>start_time</span> {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
             <span class='prelude-val'>Some</span>(<span class='ident'>start_time</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>&lt;</span> <span class='ident'>start_time</span> {
+                <span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>position</span> <span class='op'>&lt;</span> <span class='ident'>start_time</span> {
                     <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>decode_header_only</span>() {
                         <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>) <span class='op'>=&gt;</span> {
-                            <span class='self'>self</span>.<span class='ident'>position_ms</span> <span class='op'>+=</span> <span class='ident'>frame</span>.<span class='ident'>duration</span> <span class='kw'>as</span> <span class='ident'>f64</span>
+                            <span class='self'>self</span>.<span class='ident'>position</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>position</span> <span class='op'>+</span> <span class='ident'>frame</span>.<span class='ident'>duration</span>;
                         }
                         <span class='prelude-val'>Err</span>(<span class='ident'>SimplemadError</span>::<span class='ident'>Mad</span>(<span class='ident'>MadError</span>::<span class='ident'>BufLen</span>)) <span class='op'>=&gt;</span> {
                             <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>refill_buffer</span>() {
@@ -1174,6 +1210,7 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
         <span class='self'>self</span>.<span class='ident'>get_frame</span>()
     }
 
+    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>trivial_numeric_casts</span>)]</span> <span class='comment'>// header.bit_rate is sometimes u32</span>
     <span class='kw'>fn</span> <span class='ident'>decode_header_only</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
         <span class='kw'>unsafe</span> {
             <span class='ident'>mad_header_decode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>stream</span>);
@@ -1188,8 +1225,8 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 <span class='ident'>layer</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>layer</span>,
                 <span class='ident'>bit_rate</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>bit_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
                 <span class='ident'>samples</span>: <span class='ident'>Vec</span>::<span class='ident'>new</span>(),
-                <span class='ident'>duration</span>: <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>) <span class='kw'>as</span> <span class='ident'>f32</span>,
-                <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position_ms</span>,
+                <span class='ident'>duration</span>: <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>),
+                <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position</span>,
             };
             <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>)
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>error_is_recoverable</span>(<span class='kw-2'>&amp;</span><span class='ident'>error</span>) {
@@ -1200,6 +1237,7 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
         }
     }
 
+    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>trivial_numeric_casts</span>)]</span> <span class='comment'>// header.bit_rate is sometimes u32</span>
     <span class='kw'>fn</span> <span class='ident'>decode_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Frame</span>, <span class='ident'>SimplemadError</span><span class='op'>&gt;</span> {
         <span class='kw'>unsafe</span> {
             <span class='ident'>mad_frame_decode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>frame</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>stream</span>);
@@ -1230,11 +1268,11 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
 
         <span class='kw'>let</span> <span class='ident'>frame</span> <span class='op'>=</span> <span class='ident'>Frame</span> {
             <span class='ident'>sample_rate</span>: <span class='ident'>pcm</span>.<span class='ident'>sample_rate</span>,
-            <span class='ident'>duration</span>: <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>) <span class='kw'>as</span> <span class='ident'>f32</span>,
+            <span class='ident'>duration</span>: <span class='ident'>frame_duration</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>frame</span>),
             <span class='ident'>mode</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>mode</span>,
             <span class='ident'>layer</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>layer</span>,
             <span class='ident'>bit_rate</span>: <span class='self'>self</span>.<span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>bit_rate</span> <span class='kw'>as</span> <span class='ident'>u32</span>,
-            <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position_ms</span>,
+            <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position</span>,
             <span class='ident'>samples</span>: <span class='ident'>samples</span>,
         };
         <span class='prelude-val'>Ok</span>(<span class='ident'>frame</span>)
@@ -1333,9 +1371,10 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='ident'>err</span> <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='ident'>MadError</span>::<span class='prelude-val'>None</span> <span class='op'>||</span> (<span class='op'>*</span><span class='ident'>err</span> <span class='kw'>as</span> <span class='ident'>u16</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xff00</span> <span class='op'>!=</span> <span class='number'>0</span>
 }
 
-<span class='kw'>fn</span> <span class='ident'>frame_duration</span>(<span class='ident'>frame</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadFrame</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+<span class='kw'>fn</span> <span class='ident'>frame_duration</span>(<span class='ident'>frame</span>: <span class='kw-2'>&amp;</span><span class='ident'>MadFrame</span>) <span class='op'>-&gt;</span> <span class='ident'>Duration</span> {
     <span class='kw'>let</span> <span class='ident'>duration</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>frame</span>.<span class='ident'>header</span>.<span class='ident'>duration</span>;
-    (<span class='ident'>duration</span>.<span class='ident'>seconds</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>*</span> <span class='number'>1000.0</span> <span class='op'>+</span> (<span class='ident'>duration</span>.<span class='ident'>fraction</span> <span class='kw'>as</span> <span class='ident'>f64</span>) <span class='op'>/</span> <span class='number'>352800.0</span>
+    <span class='ident'>Duration</span>::<span class='ident'>new</span>(<span class='ident'>duration</span>.<span class='ident'>seconds</span> <span class='kw'>as</span> <span class='ident'>u64</span>,
+                  (<span class='ident'>duration</span>.<span class='ident'>fraction</span> <span class='op'>*</span> <span class='number'>1_000_000_000</span> <span class='op'>/</span> <span class='number'>352800000</span>) <span class='kw'>as</span> <span class='ident'>u32</span>)
 }
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>Default</span>, <span class='ident'>Debug</span>)]</span>
@@ -1366,9 +1405,7 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
         <span class='kw'>let</span> <span class='ident'>unity_value</span> <span class='op'>=</span> <span class='number'>0x1000_0000</span>;
 
         <span class='kw'>let</span> <span class='ident'>rounded_value</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>value</span> <span class='op'>+</span> (<span class='number'>1</span> <span class='op'>&lt;&lt;</span> (<span class='ident'>frac_bits</span> <span class='op'>-</span> <span class='number'>16</span>));
-
         <span class='kw'>let</span> <span class='ident'>clipped_value</span> <span class='op'>=</span> <span class='ident'>max</span>(<span class='op'>-</span><span class='ident'>unity_value</span>, <span class='ident'>min</span>(<span class='ident'>rounded_value</span>, <span class='ident'>unity_value</span> <span class='op'>-</span> <span class='number'>1</span>));
-
         <span class='kw'>let</span> <span class='ident'>quantized_value</span> <span class='op'>=</span> <span class='ident'>clipped_value</span> <span class='op'>&gt;&gt;</span> (<span class='ident'>frac_bits</span> <span class='op'>+</span> <span class='number'>1</span> <span class='op'>-</span> <span class='number'>16</span>);
 
         <span class='ident'>quantized_value</span> <span class='kw'>as</span> <span class='ident'>i16</span>
@@ -1438,6 +1475,7 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>BufReader</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>time</span>::<span class='ident'>Duration</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_find_duration</span>() {
@@ -1452,9 +1490,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                                       <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
                                   }
                               })
-                              .<span class='ident'>fold</span>(<span class='number'>0.0</span>, <span class='op'>|</span><span class='ident'>acc</span>, <span class='ident'>dur</span><span class='op'>|</span> <span class='ident'>acc</span> <span class='op'>+</span> (<span class='ident'>dur</span> <span class='kw'>as</span> <span class='ident'>f64</span>));
+                              .<span class='ident'>fold</span>(<span class='ident'>Duration</span>::<span class='ident'>new</span>(<span class='number'>0</span>, <span class='number'>0</span>), <span class='op'>|</span><span class='ident'>acc</span>, <span class='ident'>dtn</span><span class='op'>|</span> <span class='ident'>acc</span> <span class='op'>+</span> <span class='ident'>dtn</span>);
 
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>f64</span>::<span class='ident'>abs</span>(<span class='ident'>duration</span> <span class='op'>-</span> <span class='number'>5041.0</span>) <span class='op'>&lt;</span> <span class='number'>1.0</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>duration</span>, <span class='ident'>Duration</span>::<span class='ident'>new</span>(<span class='number'>5</span>, <span class='number'>41632464</span>));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1522,7 +1560,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='kw'>fn</span> <span class='ident'>test_decode_interval</span>() {
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>, <span class='number'>3000.0</span>, <span class='number'>4000.0</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>,
+                                               <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>3</span>),
+                                               <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>4</span>)).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
@@ -1549,7 +1589,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='kw'>fn</span> <span class='ident'>test_interval_beyond_eof</span>() {
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>, <span class='number'>60000.0</span>, <span class='number'>65000.0</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>,
+                                                   <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>60</span>),
+                                                   <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>65</span>)).<span class='ident'>unwrap</span>();
 
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>decoder</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
     }
@@ -1558,7 +1600,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='kw'>fn</span> <span class='ident'>test_decode_empty_interval</span>() {
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>, <span class='number'>2000.0</span>, <span class='number'>2000.0</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>,
+                                               <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>2</span>),
+                                               <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>2</span>)).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
@@ -1585,7 +1629,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
     <span class='kw'>fn</span> <span class='ident'>test_decode_overlong_interval</span>() {
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;sample_mp3s/constant_stereo_128.mp3&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>, <span class='number'>3000.0</span>, <span class='number'>45000.0</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file</span>,
+                                               <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>3</span>),
+                                               <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>45</span>)).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame_count</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>error_count</span> <span class='op'>=</span> <span class='number'>0</span>;
 
@@ -1866,7 +1912,9 @@ let frames: Vec&lt;Frame&gt; = partial_decoder.unwrap()
                 }
             }
         }
-        <span class='kw'>let</span> <span class='ident'>partial_decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file2</span>, <span class='number'>30_000_f64</span>, <span class='number'>60_000_f64</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>partial_decoder</span> <span class='op'>=</span> <span class='ident'>Decoder</span>::<span class='ident'>decode_interval</span>(<span class='ident'>file2</span>,
+                                                       <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>30</span>),
+                                                       <span class='ident'>Duration</span>::<span class='ident'>from_secs</span>(<span class='number'>60</span>)).<span class='ident'>unwrap</span>();
     }
 }
 </pre>
